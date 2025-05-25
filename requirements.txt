@@ -1,0 +1,19 @@
+# Core dependencies
+rich>=10.0.0            # Enhanced CLI experience
+click>=8.0.0            # Command line interface creation
+pydantic>=1.9.0         # Data validation and settings management
+
+# LLM integration
+ollama>=0.1.0           # For local LLM integration (adjust version as needed)
+requests>=2.25.0        # HTTP requests for API communication
+
+# Vector processing
+sentence-transformers>=2.2.0  # Text embeddings
+faiss-cpu>=1.7.0              # Vector storage and search
+numpy>=1.20.0                 # Numerical operations
+
+# Testing and development
+pytest>=6.2.5           # Testing framework
+black>=22.3.0           # Code formatting
+isort>=5.10.1           # Import sorting
+pylint>=2.8.0           # Linting
