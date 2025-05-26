@@ -1,0 +1,126 @@
+{
+  "session_id": "3d456e81-7cee-4ffb-ad66-46841f1c33cd",
+  "timestamp": "2025-05-26T13:33:18.246903",
+  "conversation_history": [
+    {
+      "turn_id": "f1ff06c1-8f88-4361-a8a3-d811795a3df4",
+      "timestamp": "2025-05-26T13:32:19.582826",
+      "question_id": "destination",
+      "question_text": "Where are you planning to travel?",
+      "raw_answer": "Santa Barbara, CA",
+      "final_answer": "Santa Barbara, CA",
+      "suggestions_offered": [],
+      "llm_analysis": {
+        "extracted_info": [
+          "Santa Barbara, CA"
+        ],
+        "connections": "Unable to parse detailed analysis",
+        "revealed_preferences": [],
+        "search_keywords": [
+          "Santa",
+          "Barbara,",
+          "CA"
+        ],
+        "overall_coherence": "Parsed as fallback"
+      }
+    },
+    {
+      "turn_id": "aba9b85d-3d76-4633-944b-e9d10982ebc2",
+      "timestamp": "2025-05-26T13:32:28.824709",
+      "question_id": "trip_purpose",
+      "question_text": "What's the main purpose of your trip?",
+      "raw_answer": "family vacation",
+      "final_answer": "family vacation",
+      "suggestions_offered": [],
+      "llm_analysis": {
+        "extracted_info": [
+          "family vacation"
+        ],
+        "connections": "Unable to parse detailed analysis",
+        "revealed_preferences": [],
+        "search_keywords": [
+          "family",
+          "vacation"
+        ],
+        "overall_coherence": "Parsed as fallback"
+      }
+    },
+    {
+      "turn_id": "4861f0f9-ac21-42a1-b05e-092303fff831",
+      "timestamp": "2025-05-26T13:32:38.037288",
+      "question_id": "budget_preference",
+      "question_text": "What's your budget range per night?",
+      "raw_answer": "$200 per night",
+      "final_answer": "$200 per night",
+      "suggestions_offered": [],
+      "llm_analysis": {
+        "extracted_info": [
+          "$200 per night"
+        ],
+        "connections": "Unable to parse detailed analysis",
+        "revealed_preferences": [],
+        "search_keywords": [
+          "$200",
+          "per",
+          "night"
+        ],
+        "overall_coherence": "Parsed as fallback"
+      }
+    },
+    {
+      "turn_id": "57fe8f3b-798b-4687-bf27-4d6f6691451b",
+      "timestamp": "2025-05-26T13:32:46.619071",
+      "question_id": "amenities_features",
+      "question_text": "What hotel amenities are important?",
+      "raw_answer": "pool and breakfast",
+      "final_answer": "pool and breakfast",
+      "suggestions_offered": [],
+      "llm_analysis": {
+        "extracted_info": [
+          "pool and breakfast"
+        ],
+        "connections": "Unable to parse detailed analysis",
+        "revealed_preferences": [],
+        "search_keywords": [
+          "pool",
+          "and",
+          "breakfast"
+        ],
+        "overall_coherence": "Parsed as fallback"
+      }
+    },
+    {
+      "turn_id": "ae1bfa96-c3d2-46cb-97dc-6d94b044675a",
+      "timestamp": "2025-05-26T13:32:56.011140",
+      "question_id": "stay_experience",
+      "question_text": "Describe your ideal hotel experience.",
+      "raw_answer": "family-friendly boutique hotel",
+      "final_answer": "family-friendly boutique hotel",
+      "suggestions_offered": [],
+      "llm_analysis": {
+        "extracted_info": [
+          "family-friendly boutique hotel"
+        ],
+        "connections": "Unable to parse detailed analysis",
+        "revealed_preferences": [],
+        "search_keywords": [
+          "family-friendly",
+          "boutique",
+          "hotel"
+        ],
+        "overall_coherence": "Parsed as fallback"
+      }
+    }
+  ],
+  "final_insights": {
+    "destination": "Not specified",
+    "trip_type": "Not specified",
+    "budget": "Not specified",
+    "amenities": [],
+    "style": "Not specified",
+    "activities": [],
+    "requirements": [],
+    "search_keywords": []
+  },
+  "conversation_summary": "Hotel Preference Interview (Session: 3d456e81-7cee-4ffb-ad66-46841f1c33cd)\n==================================================\n\n1. Where are you planning to travel?\nAnswer: Santa Barbara, CA\nKey info: Santa Barbara, CA\n\n2. What's the main purpose of your trip?\nAnswer: family vacation\nKey info: family vacation\n\n3. What's your budget range per night?\nAnswer: $200 per night\nKey info: $200 per night\n\n4. What hotel amenities are important?\nAnswer: pool and breakfast\nKey info: pool and breakfast\n\n5. Describe your ideal hotel experience.\nAnswer: family-friendly boutique hotel\nKey info: family-friendly boutique hotel"
+}

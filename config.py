@@ -11,10 +11,19 @@ DATA_DIR = PROJECT_ROOT / "data"
 # Ensure data directory exists
 DATA_DIR.mkdir(exist_ok=True)
 
+# Memory configuration
+MEMORY_CONFIG = {
+    "use_llm_memory": True,
+    "save_conversations": True,
+    "conversation_dir": str(DATA_DIR / "conversations"),
+    "enable_vector_storage": True,
+    "llm_analysis_timeout": 30,  # seconds
+}
+
 # Ollama LLM configuration
 OLLAMA_CONFIG = {
     "base_url": "http://localhost:11434",
-    "model": "dolphin-mixtral:8x7b",  # or another model you have installed
+    "model": "gemma3:4b",  # or another model you have installed
     "timeout": 60,  # seconds
 }
 

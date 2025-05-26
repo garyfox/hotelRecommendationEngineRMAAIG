@@ -1,119 +1,151 @@
 """
-Complete replacement for cli/interface.py with fixed input handling
+Updated CLI interface using LLM-powered conversation memory.
 """
 from typing import Dict, List
 
 from rich.console import Console
 from rich.prompt import Prompt
+from rich.panel import Panel
+from rich.table import Table
 
-from core.workflow import InterviewWorkflow
-from cli.display import format_question, format_response, display_summary
+from memory.simple_memory_workflow import LLMMemoryWorkflow
+from cli.display import format_question, format_response
 
 console = Console()
 
 
-def run_cli() -> Dict:
+def run_llm_memory_cli() -> Dict:
     """
-    Run the CLI interface for the hotel recommendation system.
-
-    Returns:
-        Dict: Collected customer preferences
+    Run the LLM memory-aware CLI interface.
     """
     console.print("[bold blue]Welcome to gatherHotelPreferences![/bold blue]")
     console.print(
         "I'll ask you 5 questions to understand your hotel preferences. "
-        "Please provide detailed answers to help find the best match.\n"
+        "I'll build on your answers as we go to understand what you're looking for.\n"
     )
 
-    # Initialize the workflow
-    workflow = InterviewWorkflow()
-
-    # Start the interview process
-    preferences = {}
+    # Initialize the LLM-powered workflow
+    workflow = LLMMemoryWorkflow()
 
     try:
         # Run through the questions
         for question_data in workflow.get_questions():
-            # Display the question
             question_id = question_data["id"]
             question_text = question_data["text"]
 
             console.print(format_question(question_text))
 
-            # Get the user's answer using standard Python input instead of Rich
+            # Get the user's answer
             try:
-                # Use standard Python input to avoid backspace issues
                 console.print("[green]Your answer[/green]:", end=" ")
                 answer = input()
             except EOFError:
-                # Handle Ctrl+D gracefully
                 console.print("\n[yellow]Input interrupted. Exiting...[/yellow]")
                 raise KeyboardInterrupt()
 
-            # Validate and potentially enhance the answer
-            validated_answer, suggestions = workflow.validate_answer(question_id, answer)
+            # Validate answer using LLM with conversation context
+            validated_answer, suggestions = workflow.validate_answer(
+                question_id, question_text, answer
+            )
 
-            # If there are suggestions to improve the answer, show them
+            # If LLM suggests improvements, show them
             if suggestions:
-                console.print(
-                    "\n[yellow]Your answer could use more detail. Consider:[/yellow]"
-                )
+                console.print("\n[yellow]Your answer could be more detailed. Consider:[/yellow]")
 
                 for suggestion in suggestions:
-                    # Check suggestion type and format accordingly
-                    if isinstance(suggestion, dict) and "type" in suggestion and "text" in suggestion:
-                        # New format with type and text
-                        suggestion_type = suggestion["type"]
-                        suggestion_text = suggestion["text"]
-
-                        if suggestion_type == "inconsistency":
-                            console.print(f"[bold red]- {suggestion_text}[/bold red]")
-                        else:
-                            console.print(f"[yellow]- {suggestion_text}[/yellow]")
-                    else:
-                        # Handle old format for backward compatibility
-                        console.print(f"[yellow]- {suggestion}[/yellow]")
+                    suggestion_text = suggestion.get("text", suggestion)
+                    console.print(f"[yellow]- {suggestion_text}[/yellow]")
 
                 # Ask for an improved answer
-                console.print("[green]Would you like to provide more details?[/green]", end=" ")
-                console.print(f"({answer}): ", end="")
+                console.print("\n[green]Would you like to provide more details?[/green]")
+                console.print(f"Current answer: [dim]{validated_answer}[/dim]")
+                console.print("[green]Additional details (or press Enter to continue)[/green]:", end=" ")
+
                 try:
                     improved_answer = input()
-                    # If user just pressed Enter, keep the original answer
-                    if not improved_answer:
-                        improved_answer = answer
+                    if improved_answer.strip():
+                        # Update with improved answer
+                        validated_answer = workflow.update_answer(
+                            question_id, question_text,
+                            f"{answer} {improved_answer}".strip()
+                        )
                 except EOFError:
-                    improved_answer = answer
+                    pass  # Continue with original answer
 
-                if improved_answer != answer:
-                    validated_answer, _ = workflow.validate_answer(
-                        question_id, improved_answer
-                    )
+            # Show simple feedback
+            console.print(format_response("Thank you!\n"))
 
-            # Store the answer
-            preferences[question_id] = validated_answer
+        # Process the completed conversation with LLM
+        console.print("[bold blue]Processing your preferences...[/bold blue]")
+        processed_results = workflow.process_conversation()
 
-            # Provide feedback
-            console.print(format_response("Thank you for your response!\n"))
+        # Display LLM insights
+        display_llm_insights(processed_results)
 
-        # Process the collected preferences
-        processed_preferences = workflow.process_preferences(preferences)
+        # Check consistency
+        if not processed_results["is_consistent"]:
+            console.print("\n[yellow]Note: I noticed some potential inconsistencies:[/yellow]")
+            for issue in processed_results["consistency_issues"]:
+                console.print(f"[yellow]- {issue}[/yellow]")
 
-        # Display a summary - use only the text part of processed preferences
-        text_preferences = {k: data["text"] if isinstance(data, dict) and "text" in data else data
-                           for k, data in processed_preferences.items()}
-        display_summary(text_preferences)
+        console.print("\n[bold green]Thank you for completing the interview![/bold green]")
+        console.print("Your preferences have been analyzed and will be used to find hotel recommendations.")
 
-        console.print(
-            "\n[bold green]Thank you for completing the interview![/bold green]"
-        )
-        console.print(
-            "Your preferences have been saved and will be used to find "
-            "hotel recommendations that match your needs."
-        )
-
-        return processed_preferences
+        return processed_results
 
     except Exception as e:
         console.print(f"[bold red]Error during interview: {str(e)}[/bold red]")
         raise
+
+
+def display_llm_insights(results: Dict) -> None:
+    """Display the LLM-generated insights in a nice format."""
+
+    insights = results.get("llm_insights", {})
+
+    if not insights or insights.get("error"):
+        console.print("[yellow]Could not generate insights summary.[/yellow]")
+        return
+
+    # Create insights table
+    table = Table(title="Your Hotel Preferences (LLM Analysis)")
+    table.add_column("Aspect", style="cyan", width=15)
+    table.add_column("Details", style="green")
+
+    # Add insights to table
+    if insights.get("destination") and insights["destination"] != "Not specified":
+        table.add_row("Destination", insights["destination"])
+
+    if insights.get("trip_type") and insights["trip_type"] != "Not specified":
+        table.add_row("Trip Type", insights["trip_type"])
+
+    if insights.get("budget") and insights["budget"] != "Not specified":
+        table.add_row("Budget", insights["budget"])
+
+    if insights.get("amenities"):
+        amenities_text = ", ".join(insights["amenities"])
+        table.add_row("Key Amenities", amenities_text)
+
+    if insights.get("style") and insights["style"] != "Not specified":
+        table.add_row("Hotel Style", insights["style"])
+
+    if insights.get("activities"):
+        activities_text = ", ".join(insights["activities"])
+        table.add_row("Planned Activities", activities_text)
+
+    if insights.get("requirements"):
+        requirements_text = ", ".join(insights["requirements"])
+        table.add_row("Special Requirements", requirements_text)
+
+    console.print("\n")
+    console.print(table)
+
+    # Show search keywords if available
+    if insights.get("search_keywords"):
+        console.print(f"\n[bold]Generated search keywords:[/bold] {', '.join(insights['search_keywords'])}")
+
+    console.print("\n")
+
+
+def display_conversation_analysis(results: Dict) -> None:
+    """Display detaile
