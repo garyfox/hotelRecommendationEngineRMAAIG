@@ -27,15 +27,16 @@ def app():
 
 @app.command()
 def interview():
-    """Start the hotel preference interview process."""
-    console.print("\n[bold green]Starting Hotel Preference Interview[/bold green]")
+    '''Start the hotel preference interview process with LLM memory.'''
+    console.print("\\n[bold green]Starting Hotel Preference Interview (LLM Memory)[/bold green]")
     try:
-        run_cli()
+        from cli.interface import run_llm_memory_cli
+        run_llm_memory_cli()
     except KeyboardInterrupt:
-        console.print("\n[yellow]Interview interrupted by user. Goodbye![/yellow]")
+        console.print("\\n[yellow]Interview interrupted by user. Goodbye![/yellow]")
         sys.exit(0)
     except Exception as e:
-        console.print(f"\n[bold red]Error: {str(e)}[/bold red]")
+        console.print(f"\\n[bold red]Error: {str(e)}[/bold red]")
         sys.exit(1)
 
 
