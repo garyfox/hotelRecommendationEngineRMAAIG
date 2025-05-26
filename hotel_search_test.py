@@ -1,286 +1,311 @@
 #!/usr/bin/env python3
 """
-Test script for Google Maps API hotel search functionality.
-This script helps test the Google Places API for finding hotels with pricing info.
+Updated Google Maps Hotel Search Test
+Returns up to 50 hotels with pricing for specific dates (Aug 1-8, 2025)
 """
-import os
+
+import googlemaps
 import json
-import requests
-from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
+from datetime import datetime, date
+from typing import List, Dict, Optional, Tuple
 
-
-@dataclass
-class Hotel:
-    """Data class for hotel information."""
-    name: str
-    place_id: str
-    address: str
-    rating: Optional[float] = None
-    price_level: Optional[str] = None  # Changed from int to str to handle both formats
-    types: List[str] = None
-    location: Optional[Dict] = None  # lat/lng
-
-
-class GoogleMapsHotelSearch:
-    """Simple Google Maps API client for hotel searches."""
-
+class HotelSearchClient:
     def __init__(self, api_key: str):
-        """
-        Initialize the Google Maps client.
+        """Initialize Google Maps client."""
+        self.client = googlemaps.Client(key=api_key)
 
-        Args:
-            api_key: Your Google Maps API key
-        """
-        self.api_key = api_key
-        self.base_url = "https://places.googleapis.com/v1/places"
-
-    def search_hotels_nearby(
+    def search_hotels_with_pricing(
         self,
         location: str,
         radius_km: float = 5.0,
-        max_results: int = 20
-    ) -> Tuple[List[Hotel], Dict]:
+        check_in: str = "2025-08-01",
+        check_out: str = "2025-08-08",
+        max_results: int = 50
+    ) -> Tuple[List[Dict], Dict]:
         """
-        Search for hotels near a location.
+        Search for hotels with pricing for specific dates.
 
         Args:
-            location: Location string (e.g., "New York, NY" or "latitude,longitude")
-            radius_km: Search radius in kilometers (max 50km for Places API)
-            max_results: Maximum number of results to return (max 20 per request)
+            location: Location string or "lat,lng"
+            radius_km: Search radius in kilometers
+            check_in: Check-in date (YYYY-MM-DD)
+            check_out: Check-out date (YYYY-MM-DD)
+            max_results: Maximum hotels to return
 
         Returns:
-            Tuple[List[Hotel], Dict]: List of hotels and raw API response metadata
+            Tuple of (hotels list, metadata dict)
         """
-        # First, we need to geocode the location if it's not coordinates
-        lat, lng = self._geocode_location(location)
-
-        if lat is None or lng is None:
-            raise ValueError(f"Could not geocode location: {location}")
-
-        # Convert km to meters (API expects meters)
-        radius_meters = int(radius_km * 1000)
-
-        # Ensure radius doesn't exceed API limit (50km = 50000m)
-        radius_meters = min(radius_meters, 50000)
-
-        # Prepare the search request
-        url = f"{self.base_url}:searchNearby"
-
-        headers = {
-            "Content-Type": "application/json",
-            "X-Goog-Api-Key": self.api_key,
-            "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.rating,places.priceLevel,places.types,places.location,places.id"
-        }
-
-        payload = {
-            "locationRestriction": {
-                "circle": {
-                    "center": {
-                        "latitude": lat,
-                        "longitude": lng
-                    },
-                    "radius": radius_meters
-                }
-            },
-            "includedTypes": ["lodging"],  # This targets hotels, motels, B&Bs, etc.
-            "maxResultCount": max_results
-        }
-
         try:
-            print(f"🔍 Searching for hotels near {location} (radius: {radius_km}km)...")
-            response = requests.post(url, headers=headers, json=payload)
-            response.raise_for_status()
+            # Geocode if location is not coordinates
+            if not self._is_coordinates(location):
+                geocode_result = self.client.geocode(location)
+                if not geocode_result:
+                    raise Exception(f"Could not geocode location: {location}")
 
-            data = response.json()
-            hotels = self._parse_hotel_results(data.get("places", []))
+                lat = geocode_result[0]['geometry']['location']['lat']
+                lng = geocode_result[0]['geometry']['location']['lng']
+                print(f"📍 Geocoded '{location}' to ({lat}, {lng})")
+            else:
+                lat, lng = map(float, location.split(','))
 
-            # Return hotels and some metadata
+            # Search for hotels using Places API (New)
+            print(f"🔍 Searching for hotels near {location} (radius: {radius_km}km)")
+            print(f"📅 Dates: {check_in} to {check_out}")
+
+            hotels = []
+            next_page_token = None
+            search_count = 0
+
+            while len(hotels) < max_results and search_count < 3:  # Limit API calls
+                # Use the correct Places API method
+                if next_page_token:
+                    response = self.client.places_nearby(
+                        location=(lat, lng),
+                        radius=radius_km * 1000,
+                        type='lodging',
+                        page_token=next_page_token
+                    )
+                else:
+                    response = self.client.places_nearby(
+                        location=(lat, lng),
+                        radius=radius_km * 1000,
+                        type='lodging'
+                    )
+
+                if not response.get('results'):
+                    break
+
+                print(f"🔍 Found {len(response['results'])} hotels in batch {search_count + 1}")
+
+                # Process results
+                for place in response['results']:
+                    if len(hotels) >= max_results:
+                        break
+
+                    hotel_data = self._process_hotel_result(place, check_in, check_out)
+                    if hotel_data:
+                        hotels.append(hotel_data)
+
+                # Check for next page
+                next_page_token = response.get('next_page_token')
+                search_count += 1
+
+                if not next_page_token:
+                    break
+
+                # Add delay between paginated requests (required by Google API)
+                if next_page_token:
+                    import time
+                    time.sleep(2)
+
+            # Sort by rating and availability
+            hotels.sort(key=lambda h: (
+                h.get('has_pricing_info', False),  # Prioritize hotels with pricing
+                h.get('rating', 0)
+            ), reverse=True)
+
             metadata = {
-                "search_location": {"lat": lat, "lng": lng},
-                "radius_km": radius_km,
-                "total_results": len(hotels),
-                "api_response_size": len(str(data))
+                'total_found': len(hotels),
+                'search_location': location,
+                'radius_km': radius_km,
+                'check_in': check_in,
+                'check_out': check_out,
+                'hotels_with_pricing': sum(1 for h in hotels if h.get('has_pricing_info')),
+                'search_timestamp': datetime.now().isoformat()
             }
 
             return hotels, metadata
 
-        except requests.exceptions.RequestException as e:
-            raise Exception(f"API request failed: {str(e)}")
+        except Exception as e:
+            print(f"❌ Error searching {location}: {str(e)}")
+            return [], {'error': str(e)}
 
-    def _geocode_location(self, location: str) -> Tuple[Optional[float], Optional[float]]:
-        """
-        Convert a location string to latitude/longitude coordinates.
-
-        Args:
-            location: Location string or "lat,lng"
-
-        Returns:
-            Tuple[Optional[float], Optional[float]]: (latitude, longitude) or (None, None)
-        """
-        # Check if it's already coordinates
-        if "," in location and location.replace(",", "").replace(".", "").replace("-", "").isdigit():
-            try:
-                lat, lng = map(float, location.split(","))
-                return lat, lng
-            except ValueError:
-                pass
-
-        # Use Geocoding API
-        geocode_url = "https://maps.googleapis.com/maps/api/geocode/json"
-        params = {
-            "address": location,
-            "key": self.api_key
-        }
-
+    def _is_coordinates(self, location: str) -> bool:
+        """Check if location string is coordinates."""
         try:
-            response = requests.get(geocode_url, params=params)
-            response.raise_for_status()
-            data = response.json()
+            parts = location.split(',')
+            return len(parts) == 2 and all(self._is_float(p.strip()) for p in parts)
+        except:
+            return False
 
-            if data["status"] == "OK" and data["results"]:
-                result = data["results"][0]
-                lat = result["geometry"]["location"]["lat"]
-                lng = result["geometry"]["location"]["lng"]
-                print(f"📍 Geocoded '{location}' to ({lat}, {lng})")
-                return lat, lng
-            else:
-                print(f"❌ Geocoding failed: {data.get('status', 'Unknown error')}")
-                return None, None
+    def _is_float(self, value: str) -> bool:
+        """Check if string can be converted to float."""
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False
 
-        except requests.exceptions.RequestException as e:
-            print(f"❌ Geocoding request failed: {str(e)}")
-            return None, None
+    def _process_hotel_result(self, place: Dict, check_in: str, check_out: str) -> Optional[Dict]:
+        """Process a single hotel result."""
+        try:
+            hotel_info = {
+                'name': place.get('name', 'Unknown Hotel'),
+                'place_id': place.get('place_id', ''),
+                'address': place.get('vicinity', 'Address not available'),
+                'rating': place.get('rating'),
+                'user_rating_count': place.get('user_ratings_total', 0),
+                'check_in': check_in,
+                'check_out': check_out,
+                'has_pricing_info': False,
+                'pricing_data': None
+            }
 
-    def _parse_hotel_results(self, places: List[Dict]) -> List[Hotel]:
+            # Try to get pricing information
+            # Note: Google Maps API doesn't directly provide hotel pricing
+            # You'd typically need to integrate with booking APIs like:
+            # - Booking.com API
+            # - Expedia API
+            # - Hotel.com API
+            # For now, we'll simulate this with a placeholder
+
+            pricing_info = self._get_hotel_pricing_placeholder(
+                hotel_info['place_id'],
+                check_in,
+                check_out
+            )
+
+            if pricing_info:
+                hotel_info['pricing_data'] = pricing_info
+                hotel_info['has_pricing_info'] = True
+
+            return hotel_info
+
+        except Exception as e:
+            print(f"⚠️ Error processing hotel: {str(e)}")
+            return None
+
+    def _get_hotel_pricing_placeholder(self, place_id: str, check_in: str, check_out: str) -> Optional[Dict]:
         """
-        Parse the API response into Hotel objects.
-
-        Args:
-            places: List of place objects from API response
-
-        Returns:
-            List[Hotel]: Parsed hotel objects
+        Placeholder for hotel pricing data.
+        In production, this would call booking APIs.
         """
-        hotels = []
+        # Simulate pricing data for demonstration
+        # In reality, you'd call booking.com, expedia, etc. APIs here
 
-        for place in places:
-            try:
-                # Debug: print the raw price level to see what we're getting
-                raw_price_level = place.get("priceLevel")
-                print(f"DEBUG: Raw price level from API: {raw_price_level} (type: {type(raw_price_level)})")
+        import random
 
-                hotel = Hotel(
-                    name=place.get("displayName", {}).get("text", "Unknown"),
-                    place_id=place.get("id", ""),
-                    address=place.get("formattedAddress", ""),
-                    rating=place.get("rating"),
-                    price_level=raw_price_level,  # Store exactly what API returns
-                    types=place.get("types", []),
-                    location=place.get("location")
-                )
-                hotels.append(hotel)
-            except Exception as e:
-                print(f"⚠️  Error parsing hotel data: {e}")
-                print(f"⚠️  Place data: {place}")
-                continue
+        # Randomly simulate if pricing is available (70% chance)
+        if random.random() < 0.7:
+            base_price = random.randint(80, 400)
+            nights = 7  # Aug 1-8 is 7 nights
 
-        return hotels
+            return {
+                'total_price': base_price * nights,
+                'price_per_night': base_price,
+                'currency': 'USD',
+                'nights': nights,
+                'booking_source': 'placeholder_api',
+                'last_updated': datetime.now().isoformat()
+            }
+
+        return None
 
 
-def print_hotel_results(hotels: List[Hotel], metadata: Dict):
-    """Pretty print the hotel search results."""
+def format_hotel_results(hotels: List[Dict], metadata: Dict) -> None:
+    """Format and display hotel results."""
     print(f"\n🏨 Found {len(hotels)} hotels:")
     print("=" * 80)
 
-    for i, hotel in enumerate(hotels, 1):
-        print(f"\n{i}. {hotel.name}")
-        print(f"   📍 {hotel.address}")
+    hotels_with_pricing = [h for h in hotels if h.get('has_pricing_info')]
+    hotels_without_pricing = [h for h in hotels if not h.get('has_pricing_info')]
 
-        if hotel.rating:
-            print(f"   ⭐ Rating: {hotel.rating}/5")
+    # Display hotels with pricing first
+    if hotels_with_pricing:
+        print(f"\n💰 Hotels with pricing ({len(hotels_with_pricing)}):")
+        print("-" * 50)
 
-        if hotel.price_level is not None:
-            price_symbols = ["Free", "$", "$", "$$", "$$"]
-            # Convert to int in case it's a string
-            price_level = int(hotel.price_level) if isinstance(hotel.price_level, str) else hotel.price_level
-            price_desc = price_symbols[price_level] if price_level < len(price_symbols) else "Unknown"
-            print(f"   💰 Price Level: {price_desc} ({price_level}/4)")
+        for i, hotel in enumerate(hotels_with_pricing, 1):
+            print(f"{i}. {hotel['name']}")
+            print(f"   📍 {hotel['address']}")
+            if hotel['rating']:
+                print(f"   ⭐ Rating: {hotel['rating']}/5")
 
-        # Show some relevant types
-        if hotel.types:
-            relevant_types = [t for t in hotel.types if t in ["hotel", "lodging", "resort", "motel", "bed_and_breakfast"]]
-            if relevant_types:
-                print(f"   🏷️  Type: {', '.join(relevant_types)}")
+            pricing = hotel.get('pricing_data', {})
+            if pricing:
+                print(f"   💵 ${pricing['price_per_night']}/night × {pricing['nights']} nights = ${pricing['total_price']} total")
 
-    print(f"\n📊 Search Metadata:")
-    print(f"   Location: {metadata['search_location']}")
-    print(f"   Radius: {metadata['radius_km']}km")
-    print(f"   API Response Size: {metadata['api_response_size']} chars")
+            print(f"   📅 {hotel['check_in']} to {hotel['check_out']}")
+            print()
+
+    # Display hotels without pricing
+    if hotels_without_pricing:
+        print(f"\n🏨 Hotels without pricing data ({len(hotels_without_pricing)}):")
+        print("-" * 50)
+
+        for i, hotel in enumerate(hotels_without_pricing, 1):
+            print(f"{i}. {hotel['name']}")
+            print(f"   📍 {hotel['address']}")
+            if hotel['rating']:
+                print(f"   ⭐ Rating: {hotel['rating']}/5")
+            print(f"   📅 {hotel['check_in']} to {hotel['check_out']} (pricing unavailable)")
+            print()
 
 
-def test_api_usage():
-    """Test function to check API usage and costs."""
+def main():
+    """Main test function."""
+    import os
 
     # Get API key from environment variable
-    api_key = os.getenv("GOOGLE_MAPS_API_KEY")
+    API_KEY = os.getenv("GOOGLE_MAPS_API_KEY_TEST")
 
-    if not api_key:
-        print("❌ Please set GOOGLE_MAPS_API_KEY environment variable")
-        print("   Example: export GOOGLE_MAPS_API_KEY='your-api-key-here'")
+    if not API_KEY:
+        print("❌ Please export GOOGLE_MAPS_API_KEY_TEST environment variable")
+        print("   Example: export GOOGLE_MAPS_API_KEY_TEST=your_api_key_here")
         return
 
-    # Initialize the search client
-    search_client = GoogleMapsHotelSearch(api_key)
+    search_client = HotelSearchClient(API_KEY)
 
-    # Test locations - feel free to modify these
+    print("🗺️ Google Maps Hotel Search Test with Pricing")
+    print("=" * 50)
+
+    # Test locations
     test_locations = [
         "Manhattan, New York, NY",
-        "40.7589,-73.9851",  # Times Square coordinates
-        # "Paris, France",  # Uncomment to test international
+        "Las Vegas, NV",
+        "40.7589,-73.9851"  # NYC coordinates
     ]
 
     for location in test_locations:
-        try:
-            print(f"\n{'='*60}")
-            print(f"Testing location: {location}")
+        print(f"\n{'=' * 60}")
+        print(f"Testing location: {location}")
+        print("=" * 60)
 
-            # Search for hotels
-            hotels, metadata = search_client.search_hotels_nearby(
-                location=location,
-                radius_km=3.0,  # 3km radius
-                max_results=10   # Limit results
-            )
+        hotels, metadata = search_client.search_hotels_with_pricing(
+            location=location,
+            radius_km=5.0,
+            check_in="2025-08-01",
+            check_out="2025-08-08",
+            max_results=50
+        )
 
-            # Display results
-            print_hotel_results(hotels, metadata)
+        if hotels:
+            format_hotel_results(hotels, metadata)
 
-            # API usage info
-            print(f"\n💸 API Usage for this search:")
-            print(f"   - Geocoding API: 1 request (if location wasn't coordinates)")
-            print(f"   - Places API (Search Nearby): 1 request")
-            print(f"   - Total cost: ~$0.017 (Geocoding $0.005 + Places $0.012)")
+            # Create simple list for LLM analysis
+            simple_hotel_list = []
+            for hotel in hotels:
+                pricing_data = hotel.get('pricing_data')
+                total_price = pricing_data.get('total_price') if pricing_data else 'Not available'
 
-        except Exception as e:
-            print(f"❌ Error searching {location}: {str(e)}")
+                hotel_summary = {
+                    'name': hotel['name'],
+                    'dates': f"{hotel['check_in']} to {hotel['check_out']}",
+                    'pricing': total_price
+                }
+                simple_hotel_list.append(hotel_summary)
 
-    print(f"\n💡 API Limits & Costs (as of 2024):")
-    print(f"   - Places API (New) Search Nearby: $12 per 1000 requests")
-    print(f"   - Geocoding API: $5 per 1000 requests")
-    print(f"   - Your estimated cost for 300 searches: ~$5.10")
-    print(f"   - Monthly limit: Usually $200 free credit for new accounts")
+            print(f"\n📋 Simple list for LLM analysis:")
+            print(json.dumps(simple_hotel_list[:10], indent=2))  # Show first 10
+
+        else:
+            print(f"❌ No hotels found for {location}")
+
+    print(f"\n💡 Next Steps:")
+    print("- Integrate with booking APIs (Booking.com, Expedia) for real pricing")
+    print("- Pass the simple hotel list to Claude Sonnet 4 for preference matching")
+    print("- Combine with your preference gathering system")
 
 
 if __name__ == "__main__":
-    print("🗺️  Google Maps Hotel Search Test")
-    print("=" * 40)
-
-    test_api_usage()
-
-    # Example of how to integrate with your existing preference system
-    print(f"\n🔗 Integration Example:")
-    print(f"   # You could call this from your main workflow like:")
-    print(f"   # hotels, meta = search_client.search_hotels_nearby(")
-    print(f"   #     location=preferences['destination'],")
-    print(f"   #     radius_km=5.0")
-    print(f"   # )")
+    main()

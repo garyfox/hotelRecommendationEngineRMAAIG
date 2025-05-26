@@ -23,7 +23,7 @@ MEMORY_CONFIG = {
 # Ollama LLM configuration
 OLLAMA_CONFIG = {
     "base_url": "http://localhost:11434",
-    "model": "qwen3:8b",  # or another model you have installed
+    "model": "gemma3:4b",  # or another model you have installed
     "timeout": 60,  # seconds
 }
 

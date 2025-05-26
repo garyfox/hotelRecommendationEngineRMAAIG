@@ -1,15 +1,20 @@
 """
-Question bank for the hotel recommendation system.
+Updated question bank for the hotel recommendation system with travel dates.
 """
 from typing import Dict, List, Optional
 
 
-# Define the 5 strategic questions
+# Define the updated 6 strategic questions (added travel dates)
 QUESTIONS = [
     {
         "id": "destination",
         "text": "Where are you planning to travel? Please include the city, country, and any specific neighborhoods or areas you're interested in.",
         "description": "Understanding the destination helps determine available hotel options and location preferences.",
+    },
+    {
+        "id": "travel_dates",
+        "text": "What are your exact travel dates? Please provide your check-in and check-out dates (e.g., 'August 1 to August 8, 2025' or 'checking in July 15th, checking out July 22nd').",
+        "description": "Specific travel dates are required to check hotel availability and pricing.",
     },
     {
         "id": "trip_purpose",
