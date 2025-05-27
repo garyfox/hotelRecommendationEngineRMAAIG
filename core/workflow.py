@@ -8,7 +8,7 @@ from questions.suggestion import generate_suggestions
 from llm.coherence import check_coherence, check_logical_consistency
 from vector.embeddings import embed_text
 from vector.storage import store_vector
-from logger import get_conversation_logger
+from conversation.logger import get_conversation_logger  # Fixed import path
 
 
 class InterviewWorkflow:
