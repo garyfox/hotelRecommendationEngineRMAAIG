@@ -1,25 +1,116 @@
-# Virtual environments
+# Data and Vector Storage
+data/
+vector_store/
+*.faiss
+*.json.bak
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
 venv/
 env/
-.env
+ENV/
+.venv/
+.env/
+.virtualenv/
 
-# Python cache and compiled files
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-
-# IDE and editor files
+# IDE and Editor Files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
-# OS files
 .DS_Store
 Thumbs.db
 
-# Project specific
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Environment Variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Logs
 *.log
+logs/
+log/
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Machine Learning Models (if you cache any)
+models/
+*.pkl
+*.pickle
+*.joblib
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# OS Generated Files
+.DS_Store?
+ehthumbs.db
+Icon?
+
+# Backup Files
+*.bak
+*.backup
+*~
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# Local Configuration Overrides
+config.local.py
+local_config.py
+
+# Documentation Build
+docs/_build/
+site/
+
+# Profiling
+.prof
