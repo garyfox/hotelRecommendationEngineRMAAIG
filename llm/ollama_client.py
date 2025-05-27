@@ -1,5 +1,5 @@
 """
-Modified OllamaClient in llm/ollama_client.py with visual status indicators
+Modified OllamaClient with conversation logging integration
 """
 import json
 import time
@@ -8,14 +8,13 @@ from typing import Dict, Any, Optional
 from rich.console import Console
 from rich.panel import Panel
 from rich.status import Status
-from rich.spinner import Spinner
 
 from config import OLLAMA_CONFIG
 
 
 class OllamaClient:
     """
-    Client for interacting with Ollama LLM.
+    Client for interacting with Ollama LLM with automatic conversation logging.
     """
 
     def __init__(self, verbose=False):
@@ -29,21 +28,21 @@ class OllamaClient:
         self.model = OLLAMA_CONFIG["model"]
         self.timeout = OLLAMA_CONFIG["timeout"]
         self.verbose = verbose
-        self.console = Console()  # Initialize console once
+        self.console = Console()
 
-    def generate(self, prompt: str, system_prompt: Optional[str] = None) -> str:
+    def generate(self, prompt: str, system_prompt: Optional[str] = None,
+                interaction_type: str = "general", context: Optional[str] = None) -> str:
         """
-        Generate a response from the LLM.
+        Generate a response from the LLM with automatic conversation logging.
 
         Args:
             prompt: The prompt to send to the model
             system_prompt: Optional system prompt to set context
+            interaction_type: Type of interaction for logging
+            context: Optional context about this interaction
 
         Returns:
             str: The generated response
-
-        Raises:
-            Exception: If there's an error communicating with Ollama
         """
         url = f"{self.base_url}/api/generate"
 
@@ -61,35 +60,53 @@ class OllamaClient:
             # Print debug information if verbose mode is enabled
             if self.verbose:
                 self.console.print("\n[bold blue]Sending request to Ollama:[/bold blue]")
-
                 if system_prompt:
                     self.console.print("[bold cyan]System prompt:[/bold cyan]")
-                    self.console.print(Panel(system_prompt, border_style="cyan", padding=(1, 2)))
-
+                    system_display = system_prompt[:200] + "..." if len(system_prompt) > 200 else system_prompt
+                    self.console.print(Panel(system_display, border_style="cyan", padding=(1, 2)))
                 self.console.print("[bold cyan]User prompt:[/bold cyan]")
-                self.console.print(Panel(prompt, border_style="cyan", padding=(1, 2)))
+                prompt_display = prompt[:200] + "..." if len(prompt) > 200 else prompt
+                self.console.print(Panel(prompt_display, border_style="cyan", padding=(1, 2)))
 
             # Add a small delay to make the spinner visible
             time.sleep(0.5)
 
             try:
-                # Update status to show we're waiting for the response
+                # Update status
                 status.update(status="[bold yellow]Waiting for Ollama response...")
 
                 # Send the request
                 response = requests.post(url, json=payload, timeout=self.timeout)
                 response.raise_for_status()
 
-                # Update status to show we're processing the response
+                # Process response
                 status.update(status="[bold green]Processing response...")
-
                 result = response.json()
                 response_text = result.get("response", "")
+
+                # Log the interaction to conversation logger
+                try:
+                    from conversation.logger import get_conversation_logger
+                    logger = get_conversation_logger()
+                    logger.log_llm_reasoning(
+                        interaction_type=interaction_type,
+                        system_prompt=system_prompt or "",
+                        user_prompt=prompt,
+                        llm_response=response_text,
+                        context=context
+                    )
+                except ImportError:
+                    # If logging module isn't available, continue without logging
+                    pass
+                except Exception:
+                    # If any other logging error, continue without logging
+                    pass
 
                 # Print the response if verbose mode is enabled
                 if self.verbose:
                     self.console.print("[bold cyan]Ollama response:[/bold cyan]")
-                    self.console.print(Panel(response_text, border_style="green", padding=(1, 2)))
+                    response_display = response_text[:300] + "..." if len(response_text) > 300 else response_text
+                    self.console.print(Panel(response_display, border_style="green", padding=(1, 2)))
                     self.console.print()
 
                 return response_text
@@ -126,14 +143,8 @@ def get_ollama_client() -> OllamaClient:
 
     Returns:
         OllamaClient: A configured Ollama client
-
-    Raises:
-        Exception: If the Ollama server is not running
     """
-    # Enable verbose mode by checking a config or environment variable
-    # For simplicity, we'll just set it to True for now
-    verbose = True  # You could also use an environment variable or config setting
-
+    verbose = True  # Could be configurable
     client = OllamaClient(verbose=verbose)
 
     if not client.is_server_running():

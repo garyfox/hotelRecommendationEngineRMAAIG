@@ -111,3 +111,28 @@ def check_logical_consistency(answers: Dict[str, str]) -> Tuple[bool, Optional[s
     else:
         # Default case if response doesn't match expected format
         return "yes" in response, None
+
+    decision = "COHERENT = True" if "yes" in response.lower() else "COHERENT = False"
+
+    # The ollama client will automatically log, but you can add the decision context:
+    response = client.generate(
+        prompt=prompt_data["user"],
+        system_prompt=prompt_data["system"],
+        interaction_type="coherence_check",
+        context=f"Checking coherence for question: {question_id}"
+    )
+
+    # Then manually log the decision if needed:
+    try:
+        from conversation.logger import get_conversation_logger
+        logger = get_conversation_logger()
+        logger.log_llm_reasoning(
+            interaction_type="coherence_decision",
+            system_prompt="",
+            user_prompt="",
+            llm_response=f"Decision: {decision}",
+            context=f"Final coherence decision for {question_id}",
+            decision=decision
+        )
+    except ImportError:
+        pass

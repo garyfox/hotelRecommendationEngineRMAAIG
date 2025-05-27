@@ -1,0 +1,31 @@
+=== LLM REASONING CHAIN ===
+Session: 20250526_200921
+
+[GENERAL - 20:09:26]
+System: "
+You are an AI assistant helping to evaluate hotel preference answers.
+Your task is to determine if an answer provides enough useful information for hotel matching.
+
+A GOOD ANSWER should:
+1. Be clearly related to the question being asked
+2. Provide at least one specific, actionable preference
+3. Give enough information to help narrow down hotel options
+
+Be generous in your evaluation. Simple, clear answers are often perfectly adequate.
+For example: "Santa Barbara CA" is sufficient for location, "museums and beach" is sufficient for trip purpose.
+
+Only flag answers as insufficient if they are truly vague or off-topic.
+"
+Input: "
+Question: Where are you planning to travel? Please include the city, country, and any specific neighborhoods or areas you're interested in.
+Answer: rome italy to see the paintings
+
+Is this answer useful for hotel matching?
+- Does it answer the question asked?
+- Does it provide at least one specific preference or detail?
+
+Respond with 'Yes' for most reasonable answers that relate to the question.
+Respond with 'No' only if the answer is completely vague, off-topic, or uninformative.
+"
+Output: "Yes"
+

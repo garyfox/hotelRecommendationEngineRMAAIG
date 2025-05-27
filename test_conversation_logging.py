@@ -1,11 +1,10 @@
 """
-Main CLI interface with conversation logging and NUCLEAR backspace fix
+Test CLI to demonstrate conversation logging functionality
 """
-import sys
-import os
 from typing import Dict
 
 from rich.console import Console
+from rich.prompt import Prompt
 
 from core.workflow import InterviewWorkflow
 from cli.display import format_question, format_response, display_summary
@@ -15,35 +14,21 @@ from vector.search import generate_search_terms
 console = Console()
 
 
-def nuclear_input(prompt: str) -> str:
+def run_conversation_test() -> Dict:
     """
-    Absolutely minimal input function that just uses plain Python.
-
-    Args:
-        prompt: The prompt to display
+    Run a test of the conversation logging system.
 
     Returns:
-        str: User input
-    """
-    # Just use the most basic input possible
-    return input(prompt)
-
-
-def run_cli() -> Dict:
-    """
-    Run the CLI interface for the hotel recommendation system with full logging.
-
-    Returns:
-        Dict: Collected customer preferences and session info
+        Dict: Session results with file paths
     """
     # Initialize conversation logger
     logger = get_conversation_logger()
 
-    console.print("[bold blue]Welcome to gatherHotelPreferences![/bold blue]")
+    console.print("[bold blue]Testing Conversation Logging System[/bold blue]")
     console.print(f"Session ID: [cyan]{logger.session_id}[/cyan]")
     console.print(
-        "I'll ask you 5 questions to understand your hotel preferences. "
-        "Please provide detailed answers to help find the best match.\n"
+        "I'll ask you the hotel preference questions and log everything "
+        "according to our storage schema.\n"
     )
 
     # Initialize the workflow
@@ -62,11 +47,12 @@ def run_cli() -> Dict:
             # Display the question
             console.print(format_question(question_text))
 
-            # Get the user's answer - MINIMAL VERSION
+            # Get the user's answer
             try:
-                answer = nuclear_input("Your answer: ")
+                console.print("[green]Your answer[/green]:", end=" ")
+                answer = input()
             except EOFError:
-                print("\nInput interrupted. Exiting...")
+                console.print("\n[yellow]Input interrupted. Exiting...[/yellow]")
                 raise KeyboardInterrupt()
 
             # Log the initial response
@@ -92,11 +78,11 @@ def run_cli() -> Dict:
                     else:
                         console.print(f"[yellow]- {suggestion}[/yellow]")
 
-                # Ask for an improved answer - MINIMAL VERSION
-                print()
-                print("Would you like to provide more details?")
+                # Ask for an improved answer
+                console.print("[green]Would you like to provide more details?[/green]", end=" ")
+                console.print(f"Press Enter to keep ({answer}) or type new answer: ", end="")
                 try:
-                    improved_answer = nuclear_input(f"Press Enter to keep ({answer}) or type new answer: ")
+                    improved_answer = input()
                     if not improved_answer.strip():
                         improved_answer = answer
                 except EOFError:
@@ -114,7 +100,7 @@ def run_cli() -> Dict:
             console.print(format_response("Thank you! Answer logged.\n"))
 
         # Generate search terms
-        console.print("[bold blue]Generating search terms from your preferences...[/bold blue]")
+        console.print("[bold blue]Generating search terms...[/bold blue]")
         search_terms = generate_search_terms(preferences)
 
         # Process preferences for vector storage
@@ -137,11 +123,11 @@ def run_cli() -> Dict:
         # Show session info
         session_info = logger.get_session_info()
 
-        console.print(f"\n[bold green]Thank you for completing the interview![/bold green]")
+        console.print(f"\n[bold green]Session Complete![/bold green]")
         console.print(f"[blue]Session ID:[/blue] {session_info['session_id']}")
-        console.print(f"[blue]Files saved in:[/blue] {session_info['session_dir']}")
+        console.print(f"[blue]Session Directory:[/blue] {session_info['session_dir']}")
+        console.print(f"\n[bold blue]Files Created:[/bold blue]")
 
-        console.print(f"\n[bold blue]Session Files:[/bold blue]")
         for file_type, file_path in session_info['files'].items():
             readable_name = file_type.replace('_', ' ').title()
             console.print(f"[blue]{readable_name}:[/blue] {file_path}")
@@ -152,26 +138,26 @@ def run_cli() -> Dict:
         console.print(f"Revisions: {metadata['total_revisions']}")
         console.print(f"LLM Interactions: {metadata['llm_interactions']}")
 
-        console.print(
-            "\nYour preferences have been saved and will be used to find "
-            "hotel recommendations that match your needs."
-        )
-
-        # Return both processed preferences and session info
-        return {
-            'preferences': processed_preferences,
-            'search_terms': search_terms,
-            'session_info': session_info
-        }
+        return session_info
 
     except Exception as e:
-        console.print(f"[bold red]Error during interview: {str(e)}[/bold red]")
+        console.print(f"[bold red]Error during conversation: {str(e)}[/bold red]")
 
-        # Try to save what we have so far
+        # Try to save what we have
         try:
-            if preferences:
-                logger.finalize_session()
+            logger.finalize_session()
         except:
             pass
 
         raise
+
+
+if __name__ == "__main__":
+    try:
+        session_info = run_conversation_test()
+        print(f"\nTest completed successfully!")
+        print(f"Check the files in: {session_info['session_dir']}")
+    except KeyboardInterrupt:
+        print("\nTest interrupted by user.")
+    except Exception as e:
+        print(f"Test failed: {str(e)}")

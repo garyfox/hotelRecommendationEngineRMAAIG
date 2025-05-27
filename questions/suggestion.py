@@ -28,10 +28,12 @@ def generate_suggestions(question_id: str, answer: str) -> List[str]:
     # Get the prompt for generating suggestions
     prompt_data = get_suggestions_prompt(question, answer)
 
-    # Send the prompt to the LLM
+    # Send the prompt to the LLM with logging context
     response = client.generate(
         prompt=prompt_data["user"],
-        system_prompt=prompt_data["system"]
+        system_prompt=prompt_data["system"],
+        interaction_type="suggestion_generation",
+        context=f"Generating suggestions for question: {question_id}"
     )
 
     # Parse the suggestions from the response
