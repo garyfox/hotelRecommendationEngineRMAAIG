@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
 Test the complete search pipeline using saved session data.
-Tests both LLM parameter extraction and hotel search.
+Tests both LLM parameter extraction and hotel search using Booking.com API.
 """
 import json
 import os
 import sys
+import requests
+from datetime import datetime, timedelta
 from pathlib import Path
 
 # Add project root to path
@@ -13,7 +15,7 @@ project_root = Path(__file__).parent.absolute()
 sys.path.insert(0, str(project_root))
 
 from search.integration import extract_search_parameters, search_hotels_from_preferences
-from search.hotel_client import HotelSearchClient
+
 
 
 def load_latest_conversation() -> dict:
@@ -108,7 +110,7 @@ def test_parameter_extraction(raw_preferences: dict):
 
 
 def test_hotel_search(search_params: dict, use_mock: bool = True):
-    """Test hotel search (with optional mocking)."""
+    """Test hotel search using Booking.com API (with optional mocking)."""
     print(f"\n🏨 Testing Hotel Search {'(MOCKED)' if use_mock else '(LIVE)'}")
     print("=" * 50)
 
@@ -118,10 +120,12 @@ def test_hotel_search(search_params: dict, use_mock: bool = True):
         mock_hotels = [
             {
                 "name": f"Sample Hotel {i+1}",
-                "place_id": f"mock_id_{i+1}",
+                "hotel_id": f"mock_id_{i+1}",
                 "address": f"Sample Address {i+1}, {search_params['location']}",
-                "rating": 4.0 + (i * 0.1),
-                "user_rating_count": 100 + (i * 50),
+                "rating": 8.5 + (i * 0.2),
+                "review_count": 100 + (i * 50),
+                "price": 150 + (i * 20),
+                "currency": "USD",
                 "check_in": search_params["check_in"],
                 "check_out": search_params["check_out"]
             }
@@ -130,35 +134,77 @@ def test_hotel_search(search_params: dict, use_mock: bool = True):
 
         print(f"✅ Found {len(mock_hotels)} mock hotels:")
         for hotel in mock_hotels:
-            print(f"  • {hotel['name']} - {hotel['rating']}⭐ - {hotel['address']}")
+            print(f"  • {hotel['name']} - {hotel['rating']}/10 - {hotel['price']} {hotel['currency']}")
 
         return mock_hotels
 
     else:
-        # Live hotel search
-        api_key = os.getenv("GOOGLE_MAPS_API_KEY_TEST")
+        # Live hotel search using Booking.com API
+        api_key = os.getenv("RAPIDAPI_KEY")
         if not api_key:
-            print("❌ No Google Maps API key found. Set GOOGLE_MAPS_API_KEY_TEST environment variable.")
+            print("❌ No RapidAPI key found. Set RAPIDAPI_KEY environment variable.")
             return None
 
         try:
-            client = HotelSearchClient(api_key)
-            hotels = client.search_hotels(
-                location=search_params["location"],
-                check_in=search_params["check_in"],
-                check_out=search_params["check_out"],
-                max_results=20
-            )
+            url = "https://booking-com.p.rapidapi.com/v1/hotels/search"
 
-            print(f"✅ Found {len(hotels)} real hotels:")
-            for hotel in hotels[:5]:  # Show first 5
-                rating = f"{hotel['rating']}⭐" if hotel['rating'] else "No rating"
-                print(f"  • {hotel['name']} - {rating} - {hotel['address']}")
+            headers = {
+                "X-RapidAPI-Key": api_key,
+                "X-RapidAPI-Host": "booking-com.p.rapidapi.com"
+            }
 
-            if len(hotels) > 5:
-                print(f"  ... and {len(hotels) - 5} more hotels")
+            # Convert location to destination_id (using Rome as example)
+            destination_map = {
+                "rome": "-126693",
+                "rome, italy": "-126693"
+                # Add more mappings as needed
+            }
+            dest_id = destination_map.get(search_params['location'].lower(), "-126693")
 
-            return hotels
+            payload = {
+                "units": "metric",
+                "room_number": "1",
+                "checkout_date": search_params["check_out"],
+                "checkin_date": search_params["check_in"],
+                "adults_number": "2",
+                "order_by": "price",
+                "filter_by_currency": "USD",
+                "locale": "en-us",
+                "dest_type": "city",
+                "dest_id": dest_id,
+                "categories_filter_ids": "class::2,class::4,free_cancellation::1",
+                "page_number": "0",
+                "include_adjacency": "true"
+            }
+
+            print("\n📡 Sending API request...")
+            response = requests.get(url, headers=headers, params=payload, timeout=30)
+
+            if response.status_code == 200:
+                data = response.json()
+                hotels = data.get('result', [])
+
+                if hotels:
+                    print(f"\n✅ Found {len(hotels)} hotels:")
+                    for hotel in hotels[:5]:  # Show first 5
+                        name = hotel.get('hotel_name', 'Unknown Hotel')
+                        price = hotel.get('min_total_price', 'N/A')
+                        currency = hotel.get('currency', 'USD')
+                        rating = hotel.get('review_score', 'No rating')
+
+                        print(f"  • {name} - {rating}/10 - {price} {currency}")
+
+                    if len(hotels) > 5:
+                        print(f"  ... and {len(hotels) - 5} more hotels")
+
+                    return hotels
+                else:
+                    print("\n❌ No hotels found in response")
+                    return None
+            else:
+                print(f"\n❌ API request failed: {response.status_code}")
+                print(f"Response: {response.text}")
+                return None
 
         except Exception as e:
             print(f"❌ Hotel search failed: {str(e)}")
@@ -166,51 +212,39 @@ def test_hotel_search(search_params: dict, use_mock: bool = True):
 
 
 def test_full_integration(raw_preferences: dict, use_mock: bool = True):
-    """Test the complete integration pipeline."""
+    """Test the complete integration pipeline using Booking.com API."""
     print(f"\n🔗 Testing Full Integration Pipeline {'(MOCKED)' if use_mock else '(LIVE)'}")
     print("=" * 50)
 
     try:
-        if use_mock:
-            # Test with mock hotel client
-            class MockHotelClient:
-                def search_hotels(self, location, check_in, check_out, radius_km=5.0, max_results=20):
-                    return [
-                        {
-                            "name": f"Integrated Hotel {i+1}",
-                            "place_id": f"integrated_id_{i+1}",
-                            "address": f"Address {i+1}, {location}",
-                            "rating": 4.0 + (i * 0.2),
-                            "user_rating_count": 200 + (i * 25),
-                            "check_in": check_in,
-                            "check_out": check_out
-                        }
-                        for i in range(3)
-                    ]
+        # Extract search parameters from preferences
+        search_params = extract_search_parameters(raw_preferences)
+        if not search_params:
+            print("❌ Cannot extract search parameters from preferences")
+            return None
 
-            mock_client = MockHotelClient()
-            hotels = search_hotels_from_preferences(raw_preferences, mock_client)
+        # Search for hotels using Booking.com API
+        hotels = test_hotel_search(search_params, use_mock=use_mock)
+        if not hotels:
+            print("❌ Hotel search returned no results")
+            return None
 
-        else:
-            # Test with real hotel client
-            api_key = os.getenv("GOOGLE_MAPS_API_KEY_TEST")
-            if not api_key:
-                print("❌ No API key for live integration test")
-                return None
+        print(f"\n✅ Integration successful! Found {len(hotels)} hotels:")
+        for hotel in hotels[:5]:  # Show first 5
+            name = hotel.get('hotel_name', hotel.get('name', 'Unknown Hotel'))
+            rating = hotel.get('review_score', hotel.get('rating', 'No rating'))
+            price = hotel.get('min_total_price', hotel.get('price', 'N/A'))
+            currency = hotel.get('currency', 'USD')
 
-            client = HotelSearchClient(api_key)
-            hotels = search_hotels_from_preferences(raw_preferences, client)
-
-        print(f"✅ Integration successful! Found {len(hotels)} hotels:")
-        for hotel in hotels:
-            rating = f"{hotel['rating']}⭐" if hotel['rating'] else "No rating"
-            print(f"  • {hotel['name']} - {rating}")
+            print(f"  • {name} - {rating}/10 - {price} {currency}")
 
         # Show what data is ready for frontier LLM
         print(f"\n📋 Data ready for frontier LLM analysis:")
-        print(f"  - {len(hotels)} hotels with names, ratings, addresses")
+        print(f"  - {len(hotels)} hotels with real-time pricing")
+        print(f"  - Prices in {hotels[0]['currency']}")
         print(f"  - Original preferences: {len(raw_preferences)} answers")
-        print(f"  - Check-in/out dates extracted and validated")
+        print(f"  - Check-in/out dates validated")
+        print(f"  - Ratings and reviews available")
 
         return hotels
 
@@ -256,8 +290,8 @@ def main():
             print(f"\n🎯 Ready for frontier LLM with {len(integrated_hotels)} hotels!")
 
         if not use_live_search:
-            print(f"\n💡 To test with real Google Maps API:")
-            print(f"   export GOOGLE_MAPS_API_KEY_TEST=your_key")
+            print(f"\n💡 To test with real Booking.com API:")
+            print(f"   export RAPIDAPI_KEY=your_rapidapi_key")
             print(f"   python {Path(__file__).name} --live")
 
     except Exception as e:
