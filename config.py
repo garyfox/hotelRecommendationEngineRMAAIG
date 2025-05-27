@@ -45,3 +45,22 @@ CLI_CONFIG = {
     "app_name": "gatherHotelPreferences",
     "app_version": "0.1.0",
 }
+
+# Booking.com integration configuration
+BOOKING_CONFIG = {
+    "api_base_url": "https://booking-com.p.rapidapi.com/v1",
+    "default_currency": "USD",
+    "default_adults": 2,
+    "default_children": 0,
+    "default_rooms": 1,
+    "timeout": 30,  # seconds
+    # Add your RapidAPI key here or use environment variable
+    "api_key": None,  # Set via environment variable BOOKING_API_KEY
+}
+
+# Booking parser configuration
+BOOKING_PARSER_CONFIG = {
+    "require_exact_dates": True,  # Reject vague dates
+    "default_stay_length": 2,     # days if only check-in provided
+    "max_future_days": 365,       # maximum days in advance
+}

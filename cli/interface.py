@@ -1,46 +1,26 @@
 """
-Main CLI interface with conversation logging and NUCLEAR backspace fix
+Complete CLI interface for hotel recommendation system with conversation logging.
 """
-import sys
-import os
-from typing import Dict
+from typing import Dict, List
+from pathlib import Path
 
 from rich.console import Console
+from rich.prompt import Prompt
 
 from core.workflow import InterviewWorkflow
 from cli.display import format_question, format_response, display_summary
-from conversation.logger import get_conversation_logger
-from vector.search import generate_search_terms
 
 console = Console()
 
 
-def nuclear_input(prompt: str) -> str:
-    """
-    Absolutely minimal input function that just uses plain Python.
-
-    Args:
-        prompt: The prompt to display
-
-    Returns:
-        str: User input
-    """
-    # Just use the most basic input possible
-    return input(prompt)
-
-
 def run_cli() -> Dict:
     """
-    Run the CLI interface for the hotel recommendation system with full logging.
+    Run the CLI interface for the hotel recommendation system.
 
     Returns:
-        Dict: Collected customer preferences and session info
+        Dict: Collected customer preferences
     """
-    # Initialize conversation logger
-    logger = get_conversation_logger()
-
     console.print("[bold blue]Welcome to gatherHotelPreferences![/bold blue]")
-    console.print(f"Session ID: [cyan]{logger.session_id}[/cyan]")
     console.print(
         "I'll ask you 5 questions to understand your hotel preferences. "
         "Please provide detailed answers to help find the best match.\n"
@@ -48,130 +28,124 @@ def run_cli() -> Dict:
 
     # Initialize the workflow
     workflow = InterviewWorkflow()
+
+    # Start the interview process
     preferences = {}
 
     try:
         # Run through the questions
         for question_data in workflow.get_questions():
+            # Display the question
             question_id = question_data["id"]
             question_text = question_data["text"]
 
             # Log the question
-            logger.log_question(question_id, question_text)
+            workflow.log_question(question_id, question_text)
 
-            # Display the question
             console.print(format_question(question_text))
 
-            # Get the user's answer - MINIMAL VERSION
+            # Get the user's answer using standard Python input instead of Rich
             try:
-                answer = nuclear_input("Your answer: ")
+                # Use standard Python input to avoid backspace issues
+                console.print("[green]Your answer[/green]:", end=" ")
+                answer = input()
             except EOFError:
-                print("\nInput interrupted. Exiting...")
+                # Handle Ctrl+D gracefully
+                console.print("\n[yellow]Input interrupted. Exiting...[/yellow]")
                 raise KeyboardInterrupt()
-
-            # Log the initial response
-            logger.log_user_response(question_id, answer, is_revision=False)
 
             # Validate and potentially enhance the answer
             validated_answer, suggestions = workflow.validate_answer(question_id, answer)
 
-            # Handle suggestions
+            # If there are suggestions to improve the answer, show them
             if suggestions:
-                # Log the suggestions
-                logger.log_suggestions(question_id, suggestions)
+                console.print(
+                    "\n[yellow]Your answer could use more detail. Consider:[/yellow]"
+                )
 
-                console.print("\n[yellow]Your answer could use more detail. Consider:[/yellow]")
                 for suggestion in suggestions:
-                    if isinstance(suggestion, dict):
-                        suggestion_type = suggestion.get("type", "general")
-                        suggestion_text = suggestion.get("text", str(suggestion))
+                    # Check suggestion type and format accordingly
+                    if isinstance(suggestion, dict) and "type" in suggestion and "text" in suggestion:
+                        # New format with type and text
+                        suggestion_type = suggestion["type"]
+                        suggestion_text = suggestion["text"]
+
                         if suggestion_type == "inconsistency":
                             console.print(f"[bold red]- {suggestion_text}[/bold red]")
                         else:
                             console.print(f"[yellow]- {suggestion_text}[/yellow]")
                     else:
+                        # Handle old format for backward compatibility
                         console.print(f"[yellow]- {suggestion}[/yellow]")
 
-                # Ask for an improved answer - MINIMAL VERSION
-                print()
-                print("Would you like to provide more details?")
+                # Ask for an improved answer
+                console.print("[green]Would you like to provide more details?[/green]", end=" ")
+                console.print(f"({answer}): ", end="")
                 try:
-                    improved_answer = nuclear_input(f"Press Enter to keep ({answer}) or type new answer: ")
-                    if not improved_answer.strip():
+                    improved_answer = input()
+                    # If user just pressed Enter, keep the original answer
+                    if not improved_answer:
                         improved_answer = answer
                 except EOFError:
                     improved_answer = answer
 
                 if improved_answer != answer:
-                    # Log the revised response
-                    logger.log_user_response(question_id, improved_answer, is_revision=True)
-                    validated_answer, _ = workflow.validate_answer(question_id, improved_answer)
+                    # Log the revision
+                    workflow.log_answer_revision(question_id, answer, improved_answer)
+                    validated_answer, _ = workflow.validate_answer(
+                        question_id, improved_answer
+                    )
 
-            # Store the final answer
+            # Store the answer
             preferences[question_id] = validated_answer
 
             # Provide feedback
-            console.print(format_response("Thank you! Answer logged.\n"))
+            console.print(format_response("Thank you for your response!\n"))
 
-        # Generate search terms
-        console.print("[bold blue]Generating search terms from your preferences...[/bold blue]")
-        search_terms = generate_search_terms(preferences)
-
-        # Process preferences for vector storage
+        # Process the collected preferences
         processed_preferences = workflow.process_preferences(preferences)
 
-        # Display summary
+        # Display a summary - use only the text part of processed preferences
         text_preferences = {k: data["text"] if isinstance(data, dict) and "text" in data else data
                            for k, data in processed_preferences.items()}
         display_summary(text_preferences)
 
-        # Show search terms
-        if search_terms:
-            console.print("\n[bold cyan]Generated Search Terms:[/bold cyan]")
-            for category, terms in search_terms.items():
-                console.print(f"[cyan]{category}:[/cyan] {', '.join(terms)}")
+        console.print(
+            "\n[bold green]Thank you for completing the interview![/bold green]"
+        )
 
-        # Finalize the session
-        logger.finalize_session(search_terms)
+        # Ask about hotel search
+        console.print("\nWould you like to search for hotels with current pricing?")
+        console.print("[dim](This uses the Booking.com API)[/dim]")
+        search_hotels = input("Search for hotels? (y/n): ").lower().strip()
 
-        # Show session info
-        session_info = logger.get_session_info()
+        if search_hotels in ['y', 'yes']:
+            console.print("\n[blue]Searching for hotels...[/blue]")
 
-        console.print(f"\n[bold green]Thank you for completing the interview![/bold green]")
-        console.print(f"[blue]Session ID:[/blue] {session_info['session_id']}")
-        console.print(f"[blue]Files saved in:[/blue] {session_info['session_dir']}")
+            try:
+                # Import here to avoid circular imports
+                from hotel_search import search_hotels_for_session
 
-        console.print(f"\n[bold blue]Session Files:[/bold blue]")
-        for file_type, file_path in session_info['files'].items():
-            readable_name = file_type.replace('_', ' ').title()
-            console.print(f"[blue]{readable_name}:[/blue] {file_path}")
+                # Get the current session directory from workflow
+                session_dir_path = workflow.get_session_directory()
+                session_dir = Path(session_dir_path)
 
-        console.print(f"\n[bold blue]Session Stats:[/bold blue]")
-        metadata = session_info['metadata']
-        console.print(f"Questions: {metadata['total_questions']}")
-        console.print(f"Revisions: {metadata['total_revisions']}")
-        console.print(f"LLM Interactions: {metadata['llm_interactions']}")
+                success = search_hotels_for_session(session_dir)
+                if success:
+                    console.print("[green]✓ Hotel search completed! Results saved to session directory.[/green]")
+                else:
+                    console.print("[yellow]⚠ Hotel search completed but no results found.[/yellow]")
+
+            except Exception as e:
+                console.print(f"[red]✗ Hotel search failed: {str(e)}[/red]")
 
         console.print(
             "\nYour preferences have been saved and will be used to find "
             "hotel recommendations that match your needs."
         )
 
-        # Return both processed preferences and session info
-        return {
-            'preferences': processed_preferences,
-            'search_terms': search_terms,
-            'session_info': session_info
-        }
+        return processed_preferences
 
     except Exception as e:
         console.print(f"[bold red]Error during interview: {str(e)}[/bold red]")
-
-        # Try to save what we have so far
-        try:
-            if preferences:
-                logger.finalize_session()
-        except:
-            pass
-
         raise
