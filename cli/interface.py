@@ -1,5 +1,5 @@
 """
-Complete CLI interface for hotel recommendation system - BACKSPACE BUG FIXED.
+Complete CLI interface for hotel recommendation system - WITH CLAUDE INTEGRATION.
 Nuclear Option: Pure Python input() with Rich only for display.
 """
 from typing import Dict, List
@@ -7,7 +7,6 @@ from pathlib import Path
 import sys
 
 from rich.console import Console
-# NO MORE: from rich.prompt import Prompt  # <-- This was the problem
 
 from core.workflow import InterviewWorkflow
 from cli.display import format_question, format_response, display_summary
@@ -76,7 +75,7 @@ def safe_yes_no_input(prompt_text: str, default: str = "n") -> bool:
 def run_cli() -> Dict:
     """
     Run the CLI interface for the hotel recommendation system.
-    FIXED: No more backspace issues with pure Python input.
+    INCLUDES: Claude analysis integration after hotel search.
 
     Returns:
         Dict: Collected customer preferences
@@ -170,6 +169,8 @@ def run_cli() -> Dict:
 
         search_hotels = safe_yes_no_input("Search for hotels?", default="y")
 
+        session_dir = None
+
         if search_hotels:
             console.print("\n[blue]Searching for hotels...[/blue]")
 
@@ -210,6 +211,69 @@ def run_cli() -> Dict:
             except Exception as e:
                 console.print(f"[red]✗ Hotel search failed: {str(e)}[/red]")
                 console.print("[dim]You can try running the search again later.[/dim]")
+
+        # NEW: Claude Analysis Integration
+        if session_dir and search_hotels:
+            console.print("\n" + "="*60)
+            console.print("[bold magenta]🧠 CLAUDE AI ANALYSIS AVAILABLE[/bold magenta]")
+            console.print("[magenta]Get expert psychological analysis of your hotel preferences[/magenta]")
+            console.print("[dim]Uses Claude Sonnet 4 to read between the lines and provide brutally honest recommendations[/dim]")
+
+            # Check if ANTHROPIC_API_KEY is available
+            import os
+            has_api_key = bool(os.getenv('ANTHROPIC_API_KEY'))
+
+            if not has_api_key:
+                console.print("\n[yellow]⚠ Claude analysis requires ANTHROPIC_API_KEY environment variable[/yellow]")
+                console.print("[dim]Set your API key: export ANTHROPIC_API_KEY='your_key_here'[/dim]")
+                console.print("[dim]Get your API key from: https://console.anthropic.com/[/dim]")
+            else:
+                get_claude_analysis = safe_yes_no_input("Get Claude's expert analysis of your preferences?", default="y")
+
+                if get_claude_analysis:
+                    console.print("\n[magenta]🧠 Sending your conversation to Claude for analysis...[/magenta]")
+                    console.print("[dim]This may take 10-30 seconds[/dim]")
+
+                    try:
+                        # Import and run Claude analysis
+                        from anthropic.client import analyze_session_with_claude
+
+                        analysis_result = analyze_session_with_claude(session_dir)
+
+                        console.print("[green]✓ Claude analysis completed![/green]")
+
+                        # Show where analysis was saved
+                        analysis_file = session_dir / "claude_analysis.txt"
+                        console.print(f"[magenta]📄 Analysis saved to:[/magenta] {analysis_file}")
+
+                        # Ask if user wants to see the analysis
+                        show_analysis = safe_yes_no_input("Show Claude's analysis now?", default="y")
+
+                        if show_analysis:
+                            try:
+                                with open(analysis_file, 'r', encoding='utf-8') as f:
+                                    analysis_content = f.read()
+
+                                console.print("\n" + "="*60)
+                                console.print("[bold magenta]CLAUDE'S EXPERT ANALYSIS[/bold magenta]")
+                                console.print("="*60)
+
+                                # Display the analysis (could be long, so show it all)
+                                console.print(analysis_content)
+
+                                console.print("\n" + "="*60)
+                                console.print("[magenta]End of Claude Analysis[/magenta]")
+
+                            except Exception as e:
+                                console.print(f"[yellow]Could not display analysis: {str(e)}[/yellow]")
+                                console.print(f"[dim]You can read the full analysis at: {analysis_file}[/dim]")
+
+                        else:
+                            console.print(f"[dim]You can read the full analysis anytime at: {analysis_file}[/dim]")
+
+                    except Exception as e:
+                        console.print(f"[red]✗ Claude analysis failed: {str(e)}[/red]")
+                        console.print("[dim]The hotel search results are still available in your session directory[/dim]")
 
         console.print(
             "\nYour preferences have been saved and will be used to find "
@@ -253,7 +317,7 @@ def get_safe_input(prompt: str, allow_empty: bool = False) -> str:
 
 
 if __name__ == "__main__":
-    # Test the nuclear option
+    # Test the nuclear option with Claude integration
     try:
         result = run_cli()
         print("CLI completed successfully!")

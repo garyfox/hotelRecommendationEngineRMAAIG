@@ -12,6 +12,9 @@ sentence-transformers>=2.2.0  # Text embeddings
 faiss-cpu>=1.7.0              # Vector storage and search
 numpy>=1.20.0                 # Numerical operations
 
+# Anthropic Claude API integration
+anthropic>=0.7.0        # Official Anthropic Python SDK (alternative to direct requests)
+
 # Testing and development
 pytest>=6.2.5           # Testing framework
 black>=22.3.0           # Code formatting
