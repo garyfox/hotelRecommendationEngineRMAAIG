@@ -1,0 +1,285 @@
+{
+  "search_info": {
+    "city": "Santa Barbara",
+    "checkin": "2025-09-10",
+    "checkout": "2025-09-15",
+    "locale": "en-us",
+    "hotels_found": 34,
+    "pagination_used": true,
+    "searched_at": "2025-05-28T18:46:28.065806"
+  },
+  "hotels": [
+    {
+      "name": "Motel 6-Goleta, CA - Santa Barbara",
+      "total_price": 952.593,
+      "price_per_night": 191.0,
+      "currency": "USD",
+      "rating": 7.0,
+      "nights": 5
+    },
+    {
+      "name": "Motel 6-Santa Barbara, CA - State Street",
+      "total_price": 1005.033,
+      "price_per_night": 201.0,
+      "currency": "USD",
+      "rating": 7.1,
+      "nights": 5
+    },
+    {
+      "name": "Oasis Inn and Suites",
+      "total_price": 969.969,
+      "price_per_night": 194.0,
+      "currency": "USD",
+      "rating": 8.1,
+      "nights": 5
+    },
+    {
+      "name": "Best Western Plus Santa Barbara",
+      "total_price": 1145.426,
+      "price_per_night": 229.0,
+      "currency": "USD",
+      "rating": 8.1,
+      "nights": 5
+    },
+    {
+      "name": "Extended Stay America Suites - Santa Barbara - Calle Real",
+      "total_price": 1172.06,
+      "price_per_night": 234.0,
+      "currency": "USD",
+      "rating": 6.9,
+      "nights": 5
+    },
+    {
+      "name": "Inn at East Beach",
+      "total_price": 1174.542,
+      "price_per_night": 235.0,
+      "currency": "USD",
+      "rating": 7.9,
+      "nights": 5
+    },
+    {
+      "name": "Orange Tree Inn",
+      "total_price": 1421.79,
+      "price_per_night": 284.0,
+      "currency": "USD",
+      "rating": 7.5,
+      "nights": 5
+    },
+    {
+      "name": "Casa Jardin - Boutique Suites in Downtown Santa Barbara",
+      "total_price": 1486.3818,
+      "price_per_night": 297.0,
+      "currency": "USD",
+      "rating": 9.3,
+      "nights": 5
+    },
+    {
+      "name": "Castillo Inn at the Beach",
+      "total_price": 1669.4556,
+      "price_per_night": 334.0,
+      "currency": "USD",
+      "rating": 8.6,
+      "nights": 5
+    },
+    {
+      "name": "Bath Street Inn",
+      "total_price": 1742.16,
+      "price_per_night": 348.0,
+      "currency": "USD",
+      "rating": 9.1,
+      "nights": 5
+    },
+    {
+      "name": "Rose Garden Inn",
+      "total_price": 1761.3,
+      "price_per_night": 352.0,
+      "currency": "USD",
+      "rating": 6.4,
+      "nights": 5
+    },
+    {
+      "name": "Hyatt Place Santa Barbara",
+      "total_price": 1860.8268,
+      "price_per_night": 372.0,
+      "currency": "USD",
+      "rating": 8.0,
+      "nights": 5
+    },
+    {
+      "name": "Casa Valerio - Boutique Suites in Downtown Santa Barbara",
+      "total_price": 1891.3797,
+      "price_per_night": 378.0,
+      "currency": "USD",
+      "rating": 9.3,
+      "nights": 5
+    },
+    {
+      "name": "Villa Rosa Inn",
+      "total_price": 2047.8394,
+      "price_per_night": 410.0,
+      "currency": "USD",
+      "rating": 7.1,
+      "nights": 5
+    },
+    {
+      "name": "Harbor View Inn",
+      "total_price": 2112.42,
+      "price_per_night": 422.0,
+      "currency": "USD",
+      "rating": 8.8,
+      "nights": 5
+    },
+    {
+      "name": "Cheshire Cat Inn & Cottages",
+      "total_price": 2126.19,
+      "price_per_night": 425.0,
+      "currency": "USD",
+      "rating": 9.4,
+      "nights": 5
+    },
+    {
+      "name": "The Steward, Santa Barbara, a Tribute Portfolio Hotel",
+      "total_price": 2152.67,
+      "price_per_night": 431.0,
+      "currency": "USD",
+      "rating": 8.0,
+      "nights": 5
+    },
+    {
+      "name": "The Leta Santa Barbara Goleta, Tapestry Collection by Hilton",
+      "total_price": 2241.4834,
+      "price_per_night": 448.0,
+      "currency": "USD",
+      "rating": 7.8,
+      "nights": 5
+    },
+    {
+      "name": "Hotel Virginia Santa Barbara, Tapestry Collection by Hilton",
+      "total_price": 2319.9273,
+      "price_per_night": 464.0,
+      "currency": "USD",
+      "rating": 7.8,
+      "nights": 5
+    },
+    {
+      "name": "Blue Sands Inn, A Kirkwood Collection Hotel",
+      "total_price": 2398.0208,
+      "price_per_night": 480.0,
+      "currency": "USD",
+      "rating": 7.8,
+      "nights": 5
+    },
+    {
+      "name": "Drift Santa Barbara, a Member of Design Hotels",
+      "total_price": 2643.73,
+      "price_per_night": 529.0,
+      "currency": "USD",
+      "rating": 7.8,
+      "nights": 5
+    },
+    {
+      "name": "Hotel Milo Santa Barbara",
+      "total_price": 2450.72058,
+      "price_per_night": 490.0,
+      "currency": "USD",
+      "rating": 8.0,
+      "nights": 5
+    },
+    {
+      "name": "Mar Monte Hotel, in The Unbound Collection by Hyatt",
+      "total_price": 2878.958,
+      "price_per_night": 576.0,
+      "currency": "USD",
+      "rating": 7.7,
+      "nights": 5
+    },
+    {
+      "name": "Hideaway Santa Barbara, A Kirkwood Collection Hotel",
+      "total_price": 2958.8944,
+      "price_per_night": 592.0,
+      "currency": "USD",
+      "rating": 8.2,
+      "nights": 5
+    },
+    {
+      "name": "Montecito Inn",
+      "total_price": 2965.623,
+      "price_per_night": 593.0,
+      "currency": "USD",
+      "rating": 7.6,
+      "nights": 5
+    },
+    {
+      "name": "Colors of the Coast",
+      "total_price": 3125.424,
+      "price_per_night": 625.0,
+      "currency": "USD",
+      "rating": 7.3,
+      "nights": 5
+    },
+    {
+      "name": "Palihouse Santa Barbara",
+      "total_price": 3549.14186,
+      "price_per_night": 710.0,
+      "currency": "USD",
+      "rating": 9.1,
+      "nights": 5
+    },
+    {
+      "name": "Sunny's Santa Barbara Beach House",
+      "total_price": 3891.048,
+      "price_per_night": 778.0,
+      "currency": "USD",
+      "rating": 9.1,
+      "nights": 5
+    },
+    {
+      "name": "Little Palm Cottage",
+      "total_price": 4354.4079,
+      "price_per_night": 871.0,
+      "currency": "USD",
+      "rating": 9.3,
+      "nights": 5
+    },
+    {
+      "name": "Kimpton Canary Hotel by IHG",
+      "total_price": 4398.12,
+      "price_per_night": 880.0,
+      "currency": "USD",
+      "rating": 8.7,
+      "nights": 5
+    },
+    {
+      "name": "3BR House Near UCSB & Airport, King Beds, Fast Wifi, Sleeps 6",
+      "total_price": 5090.7067,
+      "price_per_night": 1018.0,
+      "currency": "USD",
+      "rating": null,
+      "nights": 5
+    },
+    {
+      "name": "Goleta Getaway by AvantStay Private Backyard 1.5mi to the Beach",
+      "total_price": 5653.3962,
+      "price_per_night": 1131.0,
+      "currency": "USD",
+      "rating": null,
+      "nights": 5
+    },
+    {
+      "name": "Shoreline Cottage",
+      "total_price": 5729.8552,
+      "price_per_night": 1146.0,
+      "currency": "USD",
+      "rating": null,
+      "nights": 5
+    },
+    {
+      "name": "Modern Sea Escape",
+      "total_price": 6784.1309,
+      "price_per_night": 1357.0,
+      "currency": "USD",
+      "rating": null,
+      "nights": 5
+    }
+  ]
+}

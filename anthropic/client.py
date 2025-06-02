@@ -26,7 +26,7 @@ class AnthropicClient:
             )
 
         self.base_url = "https://api.anthropic.com/v1/messages"
-        self.model = "claude-3-5-sonnet-20241022"  # Latest Claude Sonnet model
+        self.model = "claude-sonnet-4-20250514"  # Latest Claude Sonnet model
         self.max_tokens = 2500
         self.temperature = 0.4
 

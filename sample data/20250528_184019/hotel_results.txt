@@ -1,0 +1,139 @@
+HOTEL SEARCH RESULTS
+Location: Santa Barbara
+Dates: 2025-09-10 to 2025-09-15
+Locale: en-us
+Found: 34 hotels (with pagination)
+==================================================
+
+ 1. Motel 6-Goleta, CA - Santa Barbara
+    💰 $191/night × 5 nights = $952.593 total
+    ⭐ Rating: 7.0/10
+
+ 2. Motel 6-Santa Barbara, CA - State Street
+    💰 $201/night × 5 nights = $1005.033 total
+    ⭐ Rating: 7.1/10
+
+ 3. Oasis Inn and Suites
+    💰 $194/night × 5 nights = $969.969 total
+    ⭐ Rating: 8.1/10
+
+ 4. Best Western Plus Santa Barbara
+    💰 $229/night × 5 nights = $1145.426 total
+    ⭐ Rating: 8.1/10
+
+ 5. Extended Stay America Suites - Santa Barbara - Calle Real
+    💰 $234/night × 5 nights = $1172.06 total
+    ⭐ Rating: 6.9/10
+
+ 6. Inn at East Beach
+    💰 $235/night × 5 nights = $1174.542 total
+    ⭐ Rating: 7.9/10
+
+ 7. Orange Tree Inn
+    💰 $284/night × 5 nights = $1421.79 total
+    ⭐ Rating: 7.5/10
+
+ 8. Casa Jardin - Boutique Suites in Downtown Santa Barbara
+    💰 $297/night × 5 nights = $1486.3818 total
+    ⭐ Rating: 9.3/10
+
+ 9. Castillo Inn at the Beach
+    💰 $334/night × 5 nights = $1669.4556 total
+    ⭐ Rating: 8.6/10
+
+10. Bath Street Inn
+    💰 $348/night × 5 nights = $1742.16 total
+    ⭐ Rating: 9.1/10
+
+11. Rose Garden Inn
+    💰 $352/night × 5 nights = $1761.3 total
+    ⭐ Rating: 6.4/10
+
+12. Hyatt Place Santa Barbara
+    💰 $372/night × 5 nights = $1860.8268 total
+    ⭐ Rating: 8.0/10
+
+13. Casa Valerio - Boutique Suites in Downtown Santa Barbara
+    💰 $378/night × 5 nights = $1891.3797 total
+    ⭐ Rating: 9.3/10
+
+14. Villa Rosa Inn
+    💰 $410/night × 5 nights = $2047.8394 total
+    ⭐ Rating: 7.1/10
+
+15. Harbor View Inn
+    💰 $422/night × 5 nights = $2112.42 total
+    ⭐ Rating: 8.8/10
+
+16. Cheshire Cat Inn & Cottages
+    💰 $425/night × 5 nights = $2126.19 total
+    ⭐ Rating: 9.4/10
+
+17. The Steward, Santa Barbara, a Tribute Portfolio Hotel
+    💰 $431/night × 5 nights = $2152.67 total
+    ⭐ Rating: 8.0/10
+
+18. The Leta Santa Barbara Goleta, Tapestry Collection by Hilton
+    💰 $448/night × 5 nights = $2241.4834 total
+    ⭐ Rating: 7.8/10
+
+19. Hotel Virginia Santa Barbara, Tapestry Collection by Hilton
+    💰 $464/night × 5 nights = $2319.9273 total
+    ⭐ Rating: 7.8/10
+
+20. Blue Sands Inn, A Kirkwood Collection Hotel
+    💰 $480/night × 5 nights = $2398.0208 total
+    ⭐ Rating: 7.8/10
+
+21. Drift Santa Barbara, a Member of Design Hotels
+    💰 $529/night × 5 nights = $2643.73 total
+    ⭐ Rating: 7.8/10
+
+22. Hotel Milo Santa Barbara
+    💰 $490/night × 5 nights = $2450.72058 total
+    ⭐ Rating: 8.0/10
+
+23. Mar Monte Hotel, in The Unbound Collection by Hyatt
+    💰 $576/night × 5 nights = $2878.958 total
+    ⭐ Rating: 7.7/10
+
+24. Hideaway Santa Barbara, A Kirkwood Collection Hotel
+    💰 $592/night × 5 nights = $2958.8944 total
+    ⭐ Rating: 8.2/10
+
+25. Montecito Inn
+    💰 $593/night × 5 nights = $2965.623 total
+    ⭐ Rating: 7.6/10
+
+26. Colors of the Coast
+    💰 $625/night × 5 nights = $3125.424 total
+    ⭐ Rating: 7.3/10
+
+27. Palihouse Santa Barbara
+    💰 $710/night × 5 nights = $3549.14186 total
+    ⭐ Rating: 9.1/10
+
+28. Sunny's Santa Barbara Beach House
+    💰 $778/night × 5 nights = $3891.048 total
+    ⭐ Rating: 9.1/10
+
+29. Little Palm Cottage
+    💰 $871/night × 5 nights = $4354.4079 total
+    ⭐ Rating: 9.3/10
+
+30. Kimpton Canary Hotel by IHG
+    💰 $880/night × 5 nights = $4398.12 total
+    ⭐ Rating: 8.7/10
+
+31. 3BR House Near UCSB & Airport, King Beds, Fast Wifi, Sleeps 6
+    💰 $1018/night × 5 nights = $5090.7067 total
+
+32. Goleta Getaway by AvantStay Private Backyard 1.5mi to the Beach
+    💰 $1131/night × 5 nights = $5653.3962 total
+
+33. Shoreline Cottage
+    💰 $1146/night × 5 nights = $5729.8552 total
+
+34. Modern Sea Escape
+    💰 $1357/night × 5 nights = $6784.1309 total
+
