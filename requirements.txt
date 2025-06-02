@@ -1,22 +1,21 @@
 # Core dependencies
-rich>=10.0.0            # Enhanced CLI experience
-click>=8.0.0            # Command line interface creation
-pydantic>=1.9.0         # Data validation and settings management
+# Core CLI and Interface
+rich>=13.0.0,<14.0.0          # Enhanced terminal interface and formatting
+click>=8.1.0,<9.0.0           # Command line interface framework
 
-# LLM integration
-ollama>=0.1.0           # For local LLM integration (adjust version as needed)
-requests>=2.25.0        # HTTP requests for API communication
+# HTTP and API Communication
+requests>=2.31.0,<3.0.0       # HTTP requests for Ollama, Booking.com, and Anthropic APIs
 
-# Vector processing
-sentence-transformers>=2.2.0  # Text embeddings
-faiss-cpu>=1.7.0              # Vector storage and search
-numpy>=1.20.0                 # Numerical operations
+# Anthropic Claude API
+anthropic>=0.40.0,<1.0.0      # Official Anthropic Python SDK for Claude analysis
 
-# Anthropic Claude API integration
-anthropic>=0.7.0        # Official Anthropic Python SDK (alternative to direct requests)
+# Vector Processing and Embeddings
+sentence-transformers>=2.2.0,<3.0.0  # Text embeddings for semantic search
+faiss-cpu>=1.7.4,<2.0.0       # Vector similarity search (CPU version)
+numpy>=1.24.0,<2.0.0          # Numerical operations for vectors and embeddings
 
-# Testing and development
-pytest>=6.2.5           # Testing framework
-black>=22.3.0           # Code formatting
-isort>=5.10.1           # Import sorting
-pylint>=2.8.0           # Linting
+# Data Validation
+pydantic>=1.9.0,<3.0.0        # Data validation (required by anthropic package)
+
+# Standard library modules (built-in, no installation needed):
+# pathlib, json, datetime, typing, uuid, os
