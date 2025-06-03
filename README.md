@@ -1,4 +1,4 @@
-# gatherHotelPreferences
+# RMAIIG Denver AI Hotel Command Line Hotel Suggestion Agent Proof of Concept
 
 **An intelligent hotel preference gathering system with LLM validation and AI analysis.**
 
@@ -6,14 +6,20 @@ Conducts natural language interviews, validates responses using local LLM reason
 
 Why did I make this? From a build workshop hosted by https://www.meetup.com/denverai/ the idea was proposed! While I think this idea is a bit too big to properly launch, I wanted to explore the idea of a thoroughly considered AI agent where the customer doesn't have to know anything about AI, LLM's or how to prompt. Rather, meet them where they are and apply deeply considered reasoning to guide them through the process.
 
-The corresponding material is also included here as a PDF. I can best be reached out to on linkedin at https://linkedin.com/in/garynfox — let's talk!
+Why the command line? It's what I know and was the fastest and easiest way for me to build this proof of concept. I'm not a web developer, so I wanted to focus on the AI and validation aspects of the project, which is really around where, how and why to build reasoning mechanisms, what level of reasoning is needed and when, and considering (despite the command line interface) a customer who is unfamiliar with best practices of frontier-LLM prompting and might not know how to ask questions the right way.
+
+Why the snark in the final recommendation? To show how to drive a LLM to produce something insightful and useful. Up to you if you want something like this or a little nicer!
+
+The corresponding presentation material is also included as a PDF. I can best be reached out to on linkedin at https://linkedin.com/in/garynfox — let's talk!
+
+Huge thanks to Efosa, David, Elena, Daniel C, Daniel R, and Geena!
 
 ## ✨ What This Does
 
 - **Smart Interview**: 6 strategic questions with LLM-powered validation
 - **Real Hotel Search**: Live Booking.com API (via RapidAPI) with current pricing (up to 60 hotels)
 - **AI Analysis**: Claude provides psychological insights and honest recommendations
-- **Rich Logging**: Complete conversation capture with LLM reasoning chains
+- **Rich Logging**: Complete conversation capture with LLM reasoning chains, including system and customer prompts
 - **Flexible Models**: qwen3:8b (recommended) or gemma3:4b (faster alternative)
 
 ## 🚀 Quick Start
@@ -22,7 +28,7 @@ The corresponding material is also included here as a PDF. I can best be reached
 - Python 3.13+
 - Ollama with qwen3:8b model
 - Booking.com API key (via RapidAPI, ~500 free calls per month, 1 call per page of results)
-- Anthropic API key (via Anthropic Console)
+- Anthropic API key (via Anthropic Console) and ~$5 of Anthropic credits (~pennies per call, just once per use of the app)
 - Machine that can run Ollama up to 8b parameter models (my specs: macBook pro M3 w/ 36 GB RAM)
 
 ### Installation
@@ -45,14 +51,15 @@ ollama pull gemma3:4b   # Alternative: faster but may struggle with complex task
 ```
 
 3. **Configure API keys**:
-```bash
-export RAPIDAPI_KEY="your_booking_com_api_key"
-export ANTHROPIC_API_KEY="your_anthropic_api_key"
-```
 
 **Get your API keys:**
 - **Booking.com**: [RapidAPI Booking.com](https://rapidapi.com/tipsters/api/booking-com)
 - **Claude AI**: [Anthropic Console](https://console.anthropic.com/)
+
+```bash
+export RAPIDAPI_KEY="your_booking_com_api_key"
+export ANTHROPIC_API_KEY="your_anthropic_api_key"
+```
 
 ### Run Your First Interview
 
@@ -187,6 +194,16 @@ OLLAMA_CONFIG["model"] = "gemma3:4b"
 # Enable verbose LLM logging in config.py
 OLLAMA_CONFIG["verbose"] = True
 ```
+
+## Future Ideas / ToDo / Up to You!
+- Real UI!
+- Comparison to other travel options!
+- Refactoring (practicing with Claude Code!)
+- Dynamic preference-gathering and better questions!
+- Alternate preference-gathering mechanisms, perhaps from other information about you, or either-or options!
+- Model Context Protocol integration!
+- Custom GPT or other wrappers!
+
 
 ## 📄 License
 
