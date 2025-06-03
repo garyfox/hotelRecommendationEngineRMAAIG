@@ -36,7 +36,7 @@ Huge thanks to Efosa, David, Elena, Daniel C, Daniel R, and Geena!
 1. **Setup project**:
 ```bash
 git clone <https://github.com/garyfox/hotelRecommendationEngineRMAAIG>
-cd gatherHotelPreferences
+cd hotelRecommendationEngineRMAAIG
 pip install -r requirements.txt
 ```
 
